@@ -1,0 +1,27 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/ui": "^3.0.0",
+    "@nuxtjs/supabase": "^1.5.0",
+    "@pinia/nuxt": "^0.9.0",
+    "@supabase/supabase-js": "^2.47.3",
+    "@tiptap/starter-kit": "^2.11.2",
+    "@tiptap/vue-3": "^2.11.2",
+    "cloudinary": "^2.5.1",
+    "date-fns": "^4.1.0",
+    "nuxt": "^3.14.1592",
+    "nuxt-tiptap-editor": "^2.1.4",
+    "quill": "^2.0.3",
+    "vue": "latest",
+    "vue-router": "latest"
+  }
+}
