@@ -54,7 +54,9 @@
 
          <form action="" class="header__search">
             <i class="ri-search-line"></i> 
-            <input type="search" placeholder="Search movies" class="header__input">
+            <!-- <SearchComponent /> -->
+
+            <!-- <input type="search" placeholder="Search movies" class="header__input"> -->
          </form>
       </header>
 

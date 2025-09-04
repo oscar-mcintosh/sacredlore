@@ -272,8 +272,8 @@ const handlePageChange = (page) => {
   }
 };
 
-const handleItemsPerPageChange = (event) => {
-  itemsPerPage.value = parseInt(event.target.value);
+const handleItemsPerPageChange = (newItemsPerPage) => {
+  itemsPerPage.value = newItemsPerPage;
 };
 
 const toggleLike = async (postId) => {

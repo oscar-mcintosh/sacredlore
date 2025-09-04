@@ -69,7 +69,7 @@
       <label for="items-per-page">Items per page:</label>
       <select 
         id="items-per-page"
-        v-model="itemsPerPage"
+        :value="itemsPerPage"
         @change="handleItemsPerPageChange"
         class="items-per-page-select"
       >
@@ -180,8 +180,8 @@ const goToLastPage = () => {
   }
 };
 
-const handleItemsPerPageChange = () => {
-  emit('items-per-page-change', props.itemsPerPage);
+const handleItemsPerPageChange = (event) => {
+  emit('items-per-page-change', parseInt(event.target.value));
 };
 </script>
 

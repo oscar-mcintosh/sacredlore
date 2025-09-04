@@ -128,13 +128,6 @@
                          </div>
                      </div>
                  </div>
-               <!-- <div class="banner__shadow"></div> -->
-
-               <!-- <div class="banner__data">
-                  <h2 class="banner__title">Avengers</h2>
-                  <span class="banner__category">Action</span>
-               </div> -->
-            <!-- </a> -->
          </article>
       </section>
 
@@ -142,47 +135,255 @@
          <div class="main-wrapper">
             <div class="main_content">
                <div class="main_content_posts">
-                  <div class="post_list">
-                     <Card :posts="latestPosts" />
+               <section class="search">
+
+                  <!-- Old Testament Section -->
+                  <div class="demo-section">
+                  <h2>Old Testament Posts</h2>
+                  <div class="posts-controls">
+                     <div class="view-controls">
+                        <label>View:</label>
+                        <select v-model="oldTestamentViewMode" class="view-select">
+                        <option value="grid">Grid</option>
+                        <option value="list">List</option>
+                        </select>
+                     </div>
+                     
+                     <div class="filter-controls">
+                        <label>Filter by Book:</label>
+                        <select v-model="oldTestamentBookFilter" @change="filterOldTestamentPosts" class="filter-select">
+                        <option value="">All Books</option>
+                        <option v-for="book in oldTestamentBooks" :key="book" :value="book">
+                           {{ book }}
+                        </option>
+                        </select>
+                     </div>
+
+                     <div class="filter-controls">
+                        <label>Filter by Category:</label>
+                        <select v-model="oldTestamentCategoryFilter" @change="filterOldTestamentPosts" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option v-for="category in oldTestamentCategories" :key="category" :value="category">
+                           {{ category }}
+                        </option>
+                        </select>
+                     </div>
+
+                     <div class="filter-controls">
+                        <label>Sort by:</label>
+                        <select v-model="oldTestamentSortOrder" @change="filterOldTestamentPosts" class="filter-select">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="title">Title A-Z</option>
+                        <option value="likes">Most Liked</option>
+                        <option value="views">Most Viewed</option>
+                        </select>
+                     </div>
                   </div>
+
+                  <!-- Old Testament Posts Grid/List -->
+                  <div v-if="filteredOldTestamentPosts.length > 0" class="posts-container" :class="oldTestamentViewMode">
+                     <div 
+                        v-for="post in paginatedOldTestamentPosts" 
+                        :key="post.id" 
+                        class="post-card"
+                     >
+                        <div class="post-header">
+                           <div class="post-meta">
+                              <span class="post-book">{{ post.book_name }}</span>
+                              <span class="post-testament">{{ post.testament }}</span>
+                              <span class="post-category">{{ post.category }}</span>
+                           </div>
+                           <h3 class="post-title">
+                              <NuxtLink :to="`/posts/${post.id}`">{{ post.title }}</NuxtLink>
+                           </h3>
+                        </div>
+                        
+                        <!-- <p class="post-description">{{ post.description }}</p> -->
+
+                        <!-- Author Information -->
+                        <div class="post-author">
+                        <div class="author-avatar">
+                           <img 
+                              :src="post.profiles?.avatar_url || '/assets/images/default-avatar.png'" 
+                              :alt="post.profiles?.names || 'Author'"
+                              class="avatar-image"
+                           />
+                        </div>
+                        <div class="author-info">
+                           <span class="author-name">{{ post.profiles?.names }} {{ post.profiles?.surnames }}</span>
+                        </div>
+                        </div>
+                        
+                        <div class="post-footer">
+                        <div class="post-stats">
+                           <span class="post-views">
+                              <i class="ri-eye-line"></i> {{ post.views_count || 0 }}
+                           </span>
+                           <span class="post-likes">
+                              <i class="ri-heart-line"></i> {{ post.likes_count || 0 }}
+                           </span>
+                           <span class="post-comments">
+                              <i class="ri-chat-1-line"></i> {{ post.comments || 0 }}
+                           </span>
+                        </div>
+                        
+                        <div class="post-date">
+                           {{ formatDate(post.created_at) }}
+                        </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- No Old Testament Posts Message -->
+                  <div v-else-if="!postsStore.loading" class="no-posts">
+                     <p>No Old Testament posts found matching your criteria.</p>
+                     <button @click="resetOldTestamentFilters" class="reset-button">
+                        Reset Filters
+                     </button>
+                  </div>
+
+                  <!-- Old Testament Pagination -->
+                  <PaginationComponent
+                     v-if="filteredOldTestamentPosts.length > 0"
+                     :current-page="oldTestamentCurrentPage"
+                     :total-pages="oldTestamentTotalPages"
+                     :total-items="filteredOldTestamentPosts.length"
+                     :items-per-page="oldTestamentItemsPerPage"
+                     @page-change="handleOldTestamentPageChange"
+                     @items-per-page-change="handleOldTestamentItemsPerPageChange"
+                  />
+                  </div>
+
                   <section class="subscribe">
-                  <div class="left_fashion main_nav_box">
-                     <ul>
-                        <li class="nav_gadgets"><a href="">Subscribe</a></li>
-                     </ul>
+                                 <!-- <div class="left_fashion main_nav_box">
+                                    <ul>
+                                       <li class="nav_gadgets"><a href="">Subscribe</a></li>
+                                    </ul>
+                                 </div> -->
+                                    <NewsletterSubscribe />
+                                 </section>
+
+
+                  <!-- New Testament Section -->
+                  <div class="demo-section">
+                  <h2>New Testament Posts</h2>
+                  <div class="posts-controls">
+                     <div class="view-controls">
+                        <label>View:</label>
+                        <select v-model="newTestamentViewMode" class="view-select">
+                        <option value="grid">Grid</option>
+                        <option value="list">List</option>
+                        </select>
+                     </div>
+                     
+                     <div class="filter-controls">
+                        <label>Filter by Book:</label>
+                        <select v-model="newTestamentBookFilter" @change="filterNewTestamentPosts" class="filter-select">
+                        <option value="">All Books</option>
+                        <option v-for="book in newTestamentBooks" :key="book" :value="book">
+                           {{ book }}
+                        </option>
+                        </select>
+                     </div>
+
+                     <div class="filter-controls">
+                        <label>Filter by Category:</label>
+                        <select v-model="newTestamentCategoryFilter" @change="filterNewTestamentPosts" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option v-for="category in newTestamentCategories" :key="category" :value="category">
+                           {{ category }}
+                        </option>
+                        </select>
+                     </div>
+
+                     <div class="filter-controls">
+                        <label>Sort by:</label>
+                        <select v-model="newTestamentSortOrder" @change="filterNewTestamentPosts" class="filter-select">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="title">Title A-Z</option>
+                        <option value="likes">Most Liked</option>
+                        <option value="views">Most Viewed</option>
+                        </select>
+                     </div>
                   </div>
-                     <NewsletterSubscribe />
-                  </section>
-                  <div class="testament-sections">
-                     <div class="header_fasion gadgets_heading">
-                        <div class="left_fashion main_nav_box">
-                           <ul>
-                              <li class="nav_gadgets"><a href="">New Testament</a></li>
-                           </ul>
+
+                  <!-- New Testament Posts Grid/List -->
+                  <div v-if="filteredNewTestamentPosts.length > 0" class="posts-container" :class="newTestamentViewMode">
+                     <div 
+                        v-for="post in paginatedNewTestamentPosts" 
+                        :key="post.id" 
+                        class="post-card"
+                     >
+                        <div class="post-header">
+                           <div class="post-meta">
+                              <span class="post-book">{{ post.book_name }}</span>
+                              <span class="post-testament">{{ post.testament }}</span>
+                              <span class="post-category">{{ post.category }}</span>
+                           </div>
+                           <h3 class="post-title">
+                              <NuxtLink :to="`/posts/${post.id}`">{{ post.title }}</NuxtLink>
+                           </h3>
                         </div>
-                        <div class="fasion_right">                        
-                           <nuxt-link to="/testament/newtestament">View all</nuxt-link>
+                        
+                        <!-- <p class="post-description">{{ post.description }}</p> -->
+
+                        <!-- Author Information -->
+                        <div class="post-author">
+                        <div class="author-avatar">
+                           <img 
+                              :src="post.profiles?.avatar_url || '/assets/images/default-avatar.png'" 
+                              :alt="post.profiles?.names || 'Author'"
+                              class="avatar-image"
+                           />
+                        </div>
+                        <div class="author-info">
+                           <span class="author-name">{{ post.profiles?.names }} {{ post.profiles?.surnames }}</span>
+                        </div>
+                        </div>
+                        
+                        <div class="post-footer">
+                        <div class="post-stats">
+                           <span class="post-views">
+                              <i class="ri-eye-line"></i> {{ post.views_count || 0 }}
+                           </span>
+                           <span class="post-likes">
+                              <i class="ri-heart-line"></i> {{ post.likes_count || 0 }}
+                           </span>
+                           <span class="post-comments">
+                              <i class="ri-chat-1-line"></i> {{ post.comments || 0 }}
+                           </span>
+                        </div>
+                        
+                        <div class="post-date">
+                           {{ formatDate(post.created_at) }}
+                        </div>
                         </div>
                      </div>
-                     <div class="post_list">
-                        <Card :posts="newTestamentPosts" />
-                     </div>
                   </div>
-                  <div class="testament-sections">
-                     <div class="header_fasion gadgets_heading">
-                     <div class="left_fashion main_nav_box">
-                       <ul>
-                         <li class="old_test"><a href="">Old Testament</a></li>
-                       </ul>
-                     </div>
-                     <div class="fasion_right">                        
-                       <nuxt-link to="/testament/oldtestament">View all</nuxt-link>
-                     </div>
-                   </div>
-                     <div class="post_list">
-                         <Card :posts="oldTestamentPosts" />
-                     </div> 
+
+                  <!-- No New Testament Posts Message -->
+                  <div v-else-if="!postsStore.loading" class="no-posts">
+                     <p>No New Testament posts found matching your criteria.</p>
+                     <button @click="resetNewTestamentFilters" class="reset-button">
+                        Reset Filters
+                     </button>
                   </div>
+
+                  <!-- New Testament Pagination -->
+                  <PaginationComponent
+                     v-if="filteredNewTestamentPosts.length > 0"
+                     :current-page="newTestamentCurrentPage"
+                     :total-pages="newTestamentTotalPages"
+                     :total-items="filteredNewTestamentPosts.length"
+                     :items-per-page="newTestamentItemsPerPage"
+                     @page-change="handleNewTestamentPageChange"
+                     @items-per-page-change="handleNewTestamentItemsPerPageChange"
+                  />
+                  </div>
+               </section>
+                  <!-- </div> -->
                </div>
                <aside class="sidebar">
                  <div class="sidebar-content">
@@ -193,32 +394,69 @@
                          <div class="post-block-list post-module-6 mt-50 overflow-hidden">
                              <div class="main_content_posts">
                                  <div class="alith_post_title_small" v-for="post in popularPosts" :key="post.id">
-                                     <h5><a href="single.html">{{ post.title }}</a></h5>
-                                     <div class="entry-meta meta-1 font-small color-grey">
+                                    <div class="post-header">
+                                       <h3 class="post-title">
+                                          <NuxtLink :to="`/posts/${post.id}`">{{ post.title }}</NuxtLink>
+                                       </h3>
+                                    </div>
+                                     <!-- <h5><a href="single.html">{{ post.title }}</a></h5> -->
+                                     <!-- <div class="entry-meta meta-1 font-small color-grey">
                                          <span class="post-on">{{ formatDate(post.created_at) }}</span>
                                          <span class="hit-count has-dot">{{ post.likes_count }} Likes</span>
-                                     </div>
+                                     </div> -->
+                                     <div class="post-footer">
+                                       <div class="post-stats">
+                                          <span class="post-views">
+                                             <i class="ri-eye-line"></i> {{ post.views_count || 0 }}
+                                          </span>
+                                          <span class="post-likes">
+                                             <i class="ri-heart-line"></i> {{ post.likes_count || 0 }}
+                                          </span>
+                                          <span class="post-comments">
+                                             <i class="ri-chat-1-line"></i> {{ post.comments || 0 }}
+                                          </span>
+                                       </div>
+                                       <div class="post-date">
+                                          {{ formatDate(post.created_at) }}
+                                       </div>
+
+                                    </div>
                                  </div>
                              </div>
                          </div>
                      </div>
 
                      <div class="sidebar-widget widget-latest-posts mb-50 mt-15">
-                     <div class="widget-header widget-header-style-1 position-relative mb-30  wow fadeInUp animated">
-                           <h5 class="widget-title mt-5 mb-30">Recent Posts</h5>
-                     </div>
-                     <div class="post-block-list post-module-6 mt-50 overflow-hidden">
+                        <div class="widget-header widget-header-style-1 position-relative mb-30  wow fadeInUp animated">
+                              <h5 class="widget-title mt-5 mb-30">Recent Posts</h5>
+                        </div>
+                        <div class="post-block-list post-module-6 mt-50 overflow-hidden">
                            <div class="main_content_posts">
-                              <!-- <span class="item-count vertical-align">1.</span> -->
                               <div class="alith_post_title_small" v-for="post in latestPosts" :key="post.id">
-                                 <h5><a href="single.html">{{ post.title }}</a></h5>
-                                 <div class="entry-meta meta-1 font-small color-grey">
-                                       <span class="post-on">{{ formatDate(post.created_at) }}</span>
-                                       <span class="hit-count has-dot">{{ post.comments }} Views</span>
-                                 </div>
+                                 <div class="post-header">
+                                       <h3 class="post-title">
+                                          <NuxtLink :to="`/posts/${post.id}`">{{ post.title }}</NuxtLink>
+                                       </h3>
+                                    </div>
+                                 <div class="post-footer">
+                                       <div class="post-stats">
+                                          <span class="post-views">
+                                             <i class="ri-eye-line"></i> {{ post.views_count || 0 }}
+                                          </span>
+                                          <span class="post-likes">
+                                             <i class="ri-heart-line"></i> {{ post.likes_count || 0 }}
+                                          </span>
+                                          <span class="post-comments">
+                                             <i class="ri-chat-1-line"></i> {{ post.comments || 0 }}
+                                          </span>
+                                       </div>
+                                       <div class="post-date">
+                                          {{ formatDate(post.created_at) }}
+                                       </div>
+                                    </div>
                               </div>
                            </div>
-                     </div>
+                        </div>
                      </div>
                  </div>
                </aside>
@@ -227,176 +465,6 @@
      </section>
 
    </main>
-      <!--==================== MOVIES ====================-->
-      <section class="movie">
-         <h3 class="card__title">Movies</h3>
-
-         <div class="movie__swiper swiper">
-            <div class="swiper-wrapper">
-               <article class="card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <!-- <img src="assets/img/movie-1.png" alt="image" class="card__img"> -->
-                     <div class="card__shadow"></div>
-
-                     <div class="card__data">
-                        <h3 class="card__name">Avengers</h3>
-                        <span class="card__category">Action</span>
-                     </div>
-
-                     <i class="ri-heart-3-line card__like"></i>
-                  </a>
-               </article>
-
-               <article class="card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <!-- <img src="assets/img/movie-2.png" alt="image" class="card__img"> -->
-                     <div class="card__shadow"></div>
-
-                     <div class="card__data">
-                        <h3 class="card__name">Interstellar</h3>
-                        <span class="card__category">Science/Fiction</span>
-                     </div>
-
-                     <i class="ri-heart-3-line card__like"></i>
-                  </a>
-               </article>
-
-               <article class="card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <!-- <img src="assets/img/movie-3.png" alt="image" class="card__img"> -->
-                     <div class="card__shadow"></div>
-
-                     <div class="card__data">
-                        <h3 class="card__name">The Lord of the Rings</h3>
-                        <span class="card__category">Science/Fiction</span>
-                     </div>
-
-                     <i class="ri-heart-3-line card__like"></i>
-                  </a>
-               </article>
-
-               <article class="card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <!-- <img src="assets/img/movie-4.png" alt="image" class="card__img"> -->
-                     <div class="card__shadow"></div>
-
-                     <div class="card__data">
-                        <h3 class="card__name">Inception</h3>
-                        <span class="card__category">Action</span>
-                     </div>
-
-                     <i class="ri-heart-3-line card__like"></i>
-                  </a>
-               </article>
-
-               <article class="card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <!-- <img src="assets/img/movie-5.png" alt="image" class="card__img"> -->
-                     <div class="card__shadow"></div>
-
-                     <div class="card__data">
-                        <h3 class="card__name">The Dark Knight</h3>
-                        <span class="card__category">Science Fiction</span>
-                     </div>
-
-                     <i class="ri-heart-3-line card__like"></i>
-                  </a>
-               </article>
-                
-               <article class="card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <!-- <img src="assets/img/movie-6.png" alt="image" class="card__img"> -->
-                     <div class="card__shadow"></div>
-
-                     <div class="card__data">
-                        <h3 class="card__name">Avengers Age of Ultron</h3>
-                        <span class="card__category">Action</span>
-                     </div>
-
-                     <i class="ri-heart-3-line card__like"></i>
-                  </a>
-               </article>
-            </div>
-         </div>
-      </section>
-
-      <!--==================== NEW ====================-->
-      <section class="new">
-         <h3 class="card__title">New</h3>
-
-         <div class="new__swiper swiper">
-            <div class="swiper-wrapper">
-               <article class="new__card card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <div class="card__shadow"></div>
-
-                     <div class="new__data card__data">
-                        <h3 class="card__name">Jurassic World</h3>
-                        <span class="card__category">Science/Fiction</span>
-                     </div>
-                  </a>
-               </article>
-
-               <article class="new__card card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <div class="card__shadow"></div>
-
-                     <div class="new__data card__data">
-                        <h3 class="card__name">Spider-Man No Way Home</h3>
-                        <span class="card__category">Science/Action</span>
-                     </div>
-                  </a>
-               </article>
-
-               <article class="new__card card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <div class="card__shadow"></div>
-
-                     <div class="new__data card__data">
-                        <h3 class="card__name">Fantastic Beasts: Dumbledore's Secrets</h3>
-                        <span class="card__category">Adventure/Fantasy</span>
-                     </div>
-                  </a>
-               </article>
-
-               <article class="new__card card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <div class="card__shadow"></div>
-
-                     <div class="new__data card__data">
-                        <h3 class="card__name">Toy Story</h3>
-                        <span class="card__category">Animation</span>
-                     </div>
-                  </a>
-               </article>
-
-               <article class="new__card card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <div class="card__shadow"></div>
-
-                     <div class="new__data card__data">
-                        <h3 class="card__name">Sonic 2</h3>
-                        <span class="card__category">Action/Adventure</span>
-                     </div>
-                  </a>
-               </article>
-               
-               <article class="new__card card__article swiper-slide">
-                  <a href="#" class="card__link">
-                     <!-- <img src="assets/img/new-6.png" alt="image" class="card__img"> -->
-                     <div class="card__shadow"></div>
-
-                     <div class="new__data card__data">
-                        <h3 class="card__name">X-Men</h3>
-                        <span class="card__category">Science/Action</span>
-                     </div>
-                  </a>
-               </article>
-            </div>
-         </div>
-
-         <!-- Pagination -->
-      </section>
 
 </template>
 
@@ -490,6 +558,200 @@ const popularPosts = computed(() =>
      .slice(0, 5)
 );
 
+
+
+
+// ==================== DEMO CODE START ====================
+// Old Testament Section Variables
+const oldTestamentViewMode = ref('grid');
+const oldTestamentBookFilter = ref('');
+const oldTestamentCategoryFilter = ref('');
+const oldTestamentSortOrder = ref('newest');
+const oldTestamentCurrentPage = ref(1);
+const oldTestamentItemsPerPage = ref(10);
+
+// New Testament Section Variables
+const newTestamentViewMode = ref('grid');
+const newTestamentBookFilter = ref('');
+const newTestamentCategoryFilter = ref('');
+const newTestamentSortOrder = ref('newest');
+const newTestamentCurrentPage = ref(1);
+const newTestamentItemsPerPage = ref(10);
+
+// Old Testament Computed Properties
+const oldTestamentBooks = computed(() => {
+  const books = allPosts.value
+    .filter(post => post.testament === 'Old Testament' && post.status !== 'draft')
+    .map(post => post.book_name);
+  return [...new Set(books)].sort();
+});
+
+const oldTestamentCategories = computed(() => {
+  const categories = allPosts.value
+    .filter(post => post.testament === 'Old Testament' && post.status !== 'draft')
+    .map(post => post.category);
+  return [...new Set(categories)].filter(Boolean).sort();
+});
+
+const filteredOldTestamentPosts = computed(() => {
+  let posts = allPosts.value.filter(post => 
+    post.testament === 'Old Testament' && post.status !== 'draft'
+  );
+
+  // Filter by book
+  if (oldTestamentBookFilter.value) {
+    posts = posts.filter(post => post.book_name === oldTestamentBookFilter.value);
+  }
+
+  // Filter by category
+  if (oldTestamentCategoryFilter.value) {
+    posts = posts.filter(post => post.category === oldTestamentCategoryFilter.value);
+  }
+
+  // Sort posts
+  switch (oldTestamentSortOrder.value) {
+    case 'newest':
+      posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    case 'oldest':
+      posts.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      break;
+    case 'title':
+      posts.sort((a, b) => a.title.localeCompare(b.title));
+      break;
+    case 'likes':
+      posts.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
+      break;
+    case 'views':
+      posts.sort((a, b) => (b.views_count || 0) - (a.views_count || 0));
+      break;
+  }
+
+  return posts;
+});
+
+const oldTestamentTotalPages = computed(() => 
+  Math.ceil(filteredOldTestamentPosts.value.length / oldTestamentItemsPerPage.value)
+);
+
+const paginatedOldTestamentPosts = computed(() => {
+  const start = (oldTestamentCurrentPage.value - 1) * oldTestamentItemsPerPage.value;
+  const end = start + oldTestamentItemsPerPage.value;
+  return filteredOldTestamentPosts.value.slice(start, end);
+});
+
+// New Testament Computed Properties
+const newTestamentBooks = computed(() => {
+  const books = allPosts.value
+    .filter(post => post.testament === 'New Testament' && post.status !== 'draft')
+    .map(post => post.book_name);
+  return [...new Set(books)].sort();
+});
+
+const newTestamentCategories = computed(() => {
+  const categories = allPosts.value
+    .filter(post => post.testament === 'New Testament' && post.status !== 'draft')
+    .map(post => post.category);
+  return [...new Set(categories)].filter(Boolean).sort();
+});
+
+const filteredNewTestamentPosts = computed(() => {
+  let posts = allPosts.value.filter(post => 
+    post.testament === 'New Testament' && post.status !== 'draft'
+  );
+
+  // Filter by book
+  if (newTestamentBookFilter.value) {
+    posts = posts.filter(post => post.book_name === newTestamentBookFilter.value);
+  }
+
+  // Filter by category
+  if (newTestamentCategoryFilter.value) {
+    posts = posts.filter(post => post.category === newTestamentCategoryFilter.value);
+  }
+
+  // Sort posts
+  switch (newTestamentSortOrder.value) {
+    case 'newest':
+      posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    case 'oldest':
+      posts.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      break;
+    case 'title':
+      posts.sort((a, b) => a.title.localeCompare(b.title));
+      break;
+    case 'likes':
+      posts.sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0));
+      break;
+    case 'views':
+      posts.sort((a, b) => (b.views_count || 0) - (a.views_count || 0));
+      break;
+  }
+
+  return posts;
+});
+
+const newTestamentTotalPages = computed(() => 
+  Math.ceil(filteredNewTestamentPosts.value.length / newTestamentItemsPerPage.value)
+);
+
+const paginatedNewTestamentPosts = computed(() => {
+  const start = (newTestamentCurrentPage.value - 1) * newTestamentItemsPerPage.value;
+  const end = start + newTestamentItemsPerPage.value;
+  return filteredNewTestamentPosts.value.slice(start, end);
+});
+
+// Old Testament Methods
+const filterOldTestamentPosts = () => {
+  oldTestamentCurrentPage.value = 1; // Reset to first page when filtering
+};
+
+const resetOldTestamentFilters = () => {
+  oldTestamentBookFilter.value = '';
+  oldTestamentCategoryFilter.value = '';
+  oldTestamentSortOrder.value = 'newest';
+  oldTestamentCurrentPage.value = 1;
+};
+
+const handleOldTestamentPageChange = (page) => {
+  oldTestamentCurrentPage.value = page;
+  // Scroll to top of old testament posts section
+  const postsSection = document.querySelector('.demo-section:nth-of-type(2) .posts-container');
+  if (postsSection) {
+    postsSection.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+const handleOldTestamentItemsPerPageChange = (newItemsPerPage) => {
+  oldTestamentItemsPerPage.value = newItemsPerPage;
+};
+
+// New Testament Methods
+const filterNewTestamentPosts = () => {
+  newTestamentCurrentPage.value = 1; // Reset to first page when filtering
+};
+
+const resetNewTestamentFilters = () => {
+  newTestamentBookFilter.value = '';
+  newTestamentCategoryFilter.value = '';
+  newTestamentSortOrder.value = 'newest';
+  newTestamentCurrentPage.value = 1;
+};
+
+const handleNewTestamentPageChange = (page) => {
+  newTestamentCurrentPage.value = page;
+  // Scroll to top of new testament posts section
+  const postsSection = document.querySelector('.demo-section:nth-of-type(3) .posts-container');
+  if (postsSection) {
+    postsSection.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+const handleNewTestamentItemsPerPageChange = (newItemsPerPage) => {
+  newTestamentItemsPerPage.value = newItemsPerPage;
+};
+// ==================== DEMO CODE END ====================
 </script>
 
 <style scoped>
@@ -779,8 +1041,9 @@ gap: 20px;
 }
 
 .subscribe {
- /* margin-bottom: 45px; */
+ margin-bottom: 45px;
  display: table;
+ padding: 0px 30px;
  width: 100%;
  border-radius: 5px;
 }
@@ -845,7 +1108,7 @@ gap: 20px;
 .sidebar{
  /* box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5); */
  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
- padding: 0 2rem;
+ /* padding: 0 2rem; */
  background-color: var(--bg);
 }
 
@@ -940,4 +1203,259 @@ align-items: center;
  font-size: 1rem;
 }
 
+
+
+/* ==================== DEMO STYLES START ==================== */
+.demo-section {
+  /* margin-bottom: 40px; */
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.demo-section h2 {
+  margin: 0 0 20px 0;
+  color: var(--title-color);
+  font-size: 1.8rem;
+  padding-bottom: 10px;
+}
+
+.posts-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.view-controls,
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.view-select,
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: white;
+}
+
+.posts-container {
+  margin-bottom: 30px;
+}
+
+.posts-container.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.posts-container.list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post-card {
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+   gap: 10px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px); 
+  background-clip: padding-box;
+}
+
+.post-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* .post-header {
+  margin-bottom: 15px;
+} */
+
+.post-title {
+  /* margin: 0 0 15px 0; */
+  font-size: 1.3rem;
+  text-transform: capitalize;
+}
+
+.post-title a {
+  color: var(--title-color);
+  text-decoration: none;
+}
+
+.post-title a:hover {
+  text-decoration: underline;
+}
+
+.post-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.post-book,
+.post-testament,
+.post-category {
+  padding: 4px 12px;
+  background: var(--border-color);
+  border-radius: 4px;
+  color: var(--white-color);
+}
+
+.post-description {
+  /* margin: 0 0 15px 0; */
+  color: var(--white-color);
+  line-height: 1.6;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.post-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.post-views,
+.post-likes,
+.post-comments {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-muted-color);
+}
+
+.post-date {
+  color: var(--text-muted-color);
+}
+
+.no-posts {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted-color);
+}
+
+.reset-button {
+  padding: 10px 20px;
+  background: var(--header-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.reset-button:hover {
+  background: var(--first-color);
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted-color);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--header-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* margin: 10px 0;
+  padding: 12px 0; */
+  /* background: #f8f9fa; */
+  border-radius: 8px;
+}
+
+.author-avatar {
+  flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.1);
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.3), inset -4px -4px 8px rgba(255, 255, 255, 0.1);
+    /* border: 2px solid var(--title-color); */
+    padding: 10px;
+    overflow: hidden;
+}
+
+.avatar-image {
+   width: 100%;
+   height: 100%;
+  /* width: 40px;
+  height: 40px; */
+  border-radius: 50%;
+  object-fit: cover;
+  /* border: 2px solid var(--border-color); */
+}
+
+.author-info {
+  flex: 1;
+}
+
+.author-name {
+  font-weight: 600;
+  color: var(--sidebar-title);
+  font-size: 14px;
+}
+
+.alith_post_title_small{
+   border-bottom: 1px solid var(--border-color);
+   padding-bottom: 15px;
+}
+
+.alith_post_title_small:last-child {
+   border-bottom: none;
+}
+
+.alith_post_title_small .post-header{
+   margin-bottom: 15px;
+}
+
+.alith_post_title_small .post-header .post-title {
+   font-size: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .posts-controls {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+}
+/* ==================== DEMO STYLES END ==================== */
 </style>
