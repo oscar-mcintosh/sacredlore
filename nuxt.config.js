@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   css: [
-    // '~/assets/css/global.css',
+    '~/assets/css/global.css',
     '~/assets/css/style.css',
     '~/assets/css/widgets.css',
     '~/assets/css/responsive.css'
@@ -33,7 +33,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       SUPABASE_URL: process.env.SUPABASE_URL,
-      SUPABASE_KEY: process.env.SUPABASE_KEY,
+      SUPABASE_KEY: process.env.VITE_SUPABASE_ANON_KEY,
       CLOUDINARY_UPLOAD_PRESET: process.env.CLOUDINARY_UPLOAD_PRESET,
       CLOUDINARY_UPLOAD_URL: process.env.CLOUDINARY_UPLOAD_URL
     },
@@ -42,7 +42,7 @@ export default defineNuxtConfig({
   },
   supabase: {
     url: process.env.SUPABASE_URL,
-    key: process.env.SUPABASE_KEY,
+    key: process.env.VITE_SUPABASE_ANON_KEY,
     redirectOptions: {
       enabled: false,
       exclude: ['/**'],  // Exclude all routes from redirect
@@ -52,7 +52,7 @@ export default defineNuxtConfig({
   hooks: {
     'ready': () => {
       console.log('SUPABASE_URL:', process.env.SUPABASE_URL)
-      console.log('SUPABASE_KEY:', process.env.SUPABASE_KEY)
+      console.log('SUPABASE_KEY:', process.env.VITE_SUPABASE_ANON_KEY)
     }
   }
 });
